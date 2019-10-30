@@ -76,6 +76,8 @@ struct IgnoreOptions {
     git_exclude: bool,
     /// Whether to ignore files case insensitively
     ignore_case_insensitive: bool,
+    /// Whether to ignore outside git repositories
+    ignore_outside_git: bool,
 }
 
 /// Ignore is a matcher useful for recursively walking one or more directories.
@@ -363,7 +365,7 @@ impl Ignore {
             Match::None,
             Match::None,
         );
-        let any_git = self.parents().any(|ig| ig.0.has_git);
+        let any_git = self.0.opts.ignore_outside_git || self.parents().any(|ig| ig.0.has_git);
         let mut saw_git = false;
         for ig in self.parents().take_while(|ig| !ig.0.is_absolute_parent) {
             if m_custom_ignore.is_none() {
@@ -515,6 +517,7 @@ impl IgnoreBuilder {
                 git_ignore: true,
                 git_exclude: true,
                 ignore_case_insensitive: false,
+                ignore_outside_git: false,
             },
         }
     }
@@ -671,6 +674,14 @@ impl IgnoreBuilder {
         self.opts.ignore_case_insensitive = yes;
         self
     }
+
+    /// Enables reading {git}ignore files outside of git repositories
+    ///
+    /// This is disabled by default.
+    pub fn ignore_outside_git(&mut self, yes: bool) -> &mut IgnoreBuilder {
+        self.opts.ignore_outside_git = yes;
+        self
+    }
 }
 
 /// Creates a new gitignore matcher for the directory given.
@@ -784,6 +795,21 @@ mod tests {
         assert!(err.is_none());
         assert!(ig.matched("foo", false).is_none());
         assert!(ig.matched("bar", false).is_none());
+        assert!(ig.matched("baz", false).is_none());
+    }
+
+    #[test]
+    fn gitignore_ignore_outside_git_repo() {
+        let td = tmpdir();
+        wfile(td.path().join(".gitignore"), "foo\n!bar");
+
+        let (ig, err) = IgnoreBuilder::new()
+            .ignore_outside_git(true)
+            .build()
+            .add_child(td.path());
+        assert!(err.is_none());
+        assert!(ig.matched("foo", false).is_ignore());
+        assert!(ig.matched("bar", false).is_whitelist());
         assert!(ig.matched("baz", false).is_none());
     }
 

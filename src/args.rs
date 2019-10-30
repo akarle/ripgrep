@@ -881,7 +881,8 @@ impl ArgMatches {
             .git_global(!self.no_ignore_vcs() && !self.no_ignore_global())
             .git_ignore(!self.no_ignore_vcs())
             .git_exclude(!self.no_ignore_vcs())
-            .ignore_case_insensitive(self.ignore_file_case_insensitive());
+            .ignore_case_insensitive(self.ignore_file_case_insensitive())
+            .ignore_outside_git(self.is_present("ignore-outside-git"));
         if !self.no_ignore() {
             builder.add_custom_ignore_filename(".rgignore");
         }

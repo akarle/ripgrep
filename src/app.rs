@@ -578,6 +578,7 @@ pub fn all_args_and_flags() -> Vec<RGArg> {
     flag_ignore_case(&mut args);
     flag_ignore_file(&mut args);
     flag_ignore_file_case_insensitive(&mut args);
+    flag_ignore_outside_git(&mut args);
     flag_invert_match(&mut args);
     flag_json(&mut args);
     flag_line_buffered(&mut args);
@@ -1355,6 +1356,22 @@ This flag can be disabled with the --no-ignore-file-case-insensitive flag.
     let arg = RGArg::switch("no-ignore-file-case-insensitive")
         .hidden()
         .overrides("ignore-file-case-insensitive");
+    args.push(arg);
+}
+
+fn flag_ignore_outside_git(args: &mut Vec<RGArg>) {
+    const SHORT: &str = "Respect gitignore files outside git repositories";
+    const LONG: &str = long!("\
+When outside a proper git repository, ripgrep will not respect gitignore files.
+While this is by design, gitignore files can be enabled for non-repositories
+using this flag.
+
+This is useful in the event that a large git repository is copied somewhere
+without the .git directory, or in SCM systems such as Perforce, which allow
+.gitignore files, but are not valid git repositories.
+");
+    let arg = RGArg::switch("ignore-outside-git")
+        .help(SHORT).long_help(LONG);
     args.push(arg);
 }
 

@@ -788,6 +788,14 @@ impl WalkBuilder {
         self
     }
 
+    /// Enables reading {git}ignore files outside of git repositories
+    ///
+    /// This is disabled by default.
+    pub fn ignore_outside_git(&mut self, yes: bool) -> &mut WalkBuilder {
+        self.ig_builder.ignore_outside_git(yes);
+        self
+    }
+
     /// Set a function for sorting directory entries by their path.
     ///
     /// If a compare function is set, the resulting iterator will return all
