@@ -882,9 +882,16 @@ impl ArgMatches {
             .git_ignore(!self.no_ignore_vcs())
             .git_exclude(!self.no_ignore_vcs())
             .ignore_case_insensitive(self.ignore_file_case_insensitive());
+
         if !self.no_ignore() {
             builder.add_custom_ignore_filename(".rgignore");
         }
+        if let Some(names) = self.values_of_os("ignore-file-name") {
+            for n in names {
+                builder.add_custom_ignore_filename(n);
+            }
+        }
+
         let sortby = self.sort_by()?;
         sortby.check()?;
         sortby.configure_walk_builder(&mut builder);

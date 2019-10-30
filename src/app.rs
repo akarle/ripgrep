@@ -577,6 +577,7 @@ pub fn all_args_and_flags() -> Vec<RGArg> {
     flag_iglob(&mut args);
     flag_ignore_case(&mut args);
     flag_ignore_file(&mut args);
+    flag_ignore_file_name(&mut args);
     flag_ignore_file_case_insensitive(&mut args);
     flag_invert_match(&mut args);
     flag_json(&mut args);
@@ -1332,6 +1333,24 @@ If you are looking for a way to include or exclude files and directories
 directly on the command line, then used -g instead.
 ");
     let arg = RGArg::flag("ignore-file", "PATH")
+        .help(SHORT).long_help(LONG)
+        .multiple()
+        .allow_leading_hyphen();
+    args.push(arg);
+}
+
+fn flag_ignore_file_name(args: &mut Vec<RGArg>) {
+    const SHORT: &str = "Specify custom ignore file name";
+    const LONG: &str = long!("\
+Specifies the name of a custom .gitignore file. All files of this name will
+be interpretted as .ignore files, regardless of whether or not it is invoked
+in a proper git repository.
+
+As a custom ignore file, these rules take precedent over other ignore files
+(i.e. .ignore or .gitignore), and should the flag be given multiple times,
+the order they are specified will indicate precedence.
+");
+    let arg = RGArg::flag("ignore-file-name", "NAME")
         .help(SHORT).long_help(LONG)
         .multiple()
         .allow_leading_hyphen();
